@@ -131,6 +131,9 @@ recall del modelo ≥ 0,95.
 
 ## 5. Estado actual (20/11/2026, semana S3)
 
+> La ejecución en planta aún no comienza: el avance de los sprints 1 y 2 se registra **simulado según el
+> cronograma** (sección 10 del plan y Anexo D). Lo ejecutado de verdad es la prueba de concepto del prototipo.
+
 - **Sprint 1 cerrado:** F1 completa y compuerta aprobada.
 - **Sprint 2 en curso:** instalación de cámaras, nodos y red.
 - **Prueba de concepto adelantada:** se construyó un prototipo funcional que detecta EPP y
