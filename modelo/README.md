@@ -252,7 +252,7 @@ sesgos propios del prototipo y cómo se controlan en el código.
 
 - El difuminado facial (RF-03) aún no está implementado. Las imágenes anotadas de
   `resultados/` muestran rostros, así que no deben compartirse fuera del equipo. La imagen de la
-  presentación se difuminó a mano.
+  presentación (`demo_alerta_1_blur.jpg`) se difuminó por separado.
 - El recall de casco y chaleco (0,50 y 0,58) no permite usar el prototipo como sistema de
   seguridad. Es solo una prueba de concepto.
 
