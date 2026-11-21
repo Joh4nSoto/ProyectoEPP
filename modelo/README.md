@@ -1,16 +1,41 @@
-# Prototipo de detección de EPP con YOLO y FiftyOne
+# Modelo de detección de EPP: guía técnica
 
-**Proyecto:** Sistema de vigilancia inteligente para el uso correcto de Elementos de Protección Personal (EPP)
-**Equipo:** Johan Soto y Fernanda Alcaino
+Documentación técnica del prototipo: datos, entrenamiento, evaluación, inferencia y alertas.
+La visión de negocio y de gestión del proyecto está en el [README principal](../README.md).
 
-Este prototipo detecta EPP en imágenes, video o cámara web, y genera una **alerta** cuando un
+El prototipo detecta EPP en imágenes, video o cámara web y genera una **alerta** cuando un
 trabajador no usa casco, chaleco, guantes, botas o antiparras. Corre 100 % local, sin internet
-después de la instalación, como exige el plan (RNF de disponibilidad sin conexión).
+después de la instalación (RNF-03). Sigue el flujo de la guía de Voxel51
+[PPE Detection and Safety Monitoring](https://docs.voxel51.com/getting_started/manufacturing/10_ppe_detection.html)
+(dataset YOLO en FiftyOne y embeddings) y agrega el entrenamiento y la evaluación de un detector
+YOLO de Ultralytics.
 
-Sigue el flujo de la guía de Voxel51
-[PPE Detection and Safety Monitoring](https://docs.voxel51.com/getting_started/manufacturing/10_ppe_detection.html):
-cargar un dataset YOLO en FiftyOne, explorarlo con embeddings y, como paso agregado, entrenar
-y evaluar un detector YOLO de Ultralytics.
+## Ficha técnica
+
+| Aspecto | Valor |
+|---|---|
+| Tarea | Detección de objetos (cajas + clase + confianza) |
+| Arquitectura | YOLO11n (Ultralytics), 2,6 M de parámetros, pesos iniciales COCO |
+| Pesos entrenados | `pesos/epp_yolo11n.pt` (5,5 MB) |
+| Dataset | Construction-PPE (Ultralytics, CC BY 4.0): 800 de entrenamiento y 200 de validación, 14.863 cajas, 12 clases |
+| Entrada | Imagen RGB redimensionada a 640 × 640 |
+| Entrenamiento | 13 épocas: 3 en GPU (RTX 3060 Ti) + 10 en CPU desde el mejor peso; batch 16, semilla 42, aumentación por defecto de Ultralytics |
+| Umbral de confianza | 0,35 (`CONF_MINIMA` en `codigo/config.py`) |
+| Métricas (validación) | mAP50 0,727 · mAP50-95 0,513 · precisión 0,91 · recall 0,70 |
+| Recall de clases de alerta | no_helmet 0,50 · no_vest 0,58 · no_gloves 0,51 · no_boots 0,61 · no_goggle 0,11 |
+| Latencia | 38 ms promedio, 56 ms máximo por imagen (CPU de escritorio, pre + inferencia + post) |
+| Stack | Python 3.11.15, PyTorch 2.6.0 (CUDA 12.4), Ultralytics 8.4.216, FiftyOne 1.22.1, OpenCV, UMAP |
+
+## Pipeline
+
+```
+01_descargar_datos ──► 02_explorar_fiftyone ──► 03_entrenar_yolo ──► 04_evaluar_fiftyone
+   dataset + YAML        embeddings + UMAP        pesos/epp_yolo11n.pt    métricas por clase
+                                                          │
+                                                          ▼
+                       cámara / video / imagen ──► 05_detectar_alertas ──► alertas.csv + imágenes anotadas
+                                                   (DetectorEPP en modelo.py: detectar → reglas → dibujar)
+```
 
 ---
 
@@ -162,11 +187,53 @@ FiftyOne no entrena el modelo: sirve para **entender los datos y los errores**.
   verdadero positivo, falso positivo o falso negativo, y ordena las imágenes por errores para
   revisarlas una a una.
 
-## 6. Privacidad y límites
+## 6. Configuración
 
-- El sistema no identifica personas ni guarda rostros por separado: registra solo fecha, origen,
-  tipo de incumplimiento y confianza (`alertas.csv`), en línea con las exclusiones del plan.
-- El modelo se entrenó con 800 imágenes de obras de construcción. En una planta real habrá que
-  reentrenar con imágenes propias etiquetadas (fase de preparación de datos del plan).
-- Las métricas de este prototipo no alcanzan aún la meta de recall ≥ 0,95; ver
-  `modelo/Registro_Ejecucion_Prototipo_EPP.md`.
+Todo lo ajustable está en `codigo/config.py`:
+
+| Variable | Uso |
+|---|---|
+| `CLASES` | Nombres de las 12 clases, en el orden de los índices del dataset |
+| `INCUMPLIMIENTOS` | Clase → (severidad, mensaje). Casco y chaleco son ALTA (Must); guantes, botas y antiparras, MEDIA (Should) |
+| `CONF_MINIMA` | Confianza mínima de una detección (0,35). Bajarla sube el recall y también las falsas alarmas |
+| `MODELO_BASE` / `MODELO_ENTRENADO` | Pesos de partida y pesos finales |
+| `DATASET_YAML` | YAML del dataset; cambiarlo permite entrenar con otro dataset (por ejemplo, SH17) |
+
+Las reglas de tiempo del video están en `05_detectar_alertas.py`: la alerta se confirma tras
+`SEGUNDOS_PERSISTENCIA = 3` segundos continuos y se silencia 30 s.
+
+Formato de `alertas.csv`: `fecha, origen, severidad, mensaje, clase, confianza`.
+
+## 7. Resultados y análisis de errores
+
+El detalle por clase, la evolución por época y la evidencia están en
+[`Registro_Ejecucion_Prototipo_EPP.md`](Registro_Ejecucion_Prototipo_EPP.md) y en `evidencia/`
+(curvas de entrenamiento, matriz de confusión, mapa de embeddings y ejemplos de alerta).
+
+- **Desbalance:** las clases `no_*` tienen de 2 a 3 veces menos cajas que las de cumplimiento.
+  Es la causa principal del bajo recall en las alertas.
+- **Precisión alta, recall bajo:** con 2.075 VP, 197 FP y 886 FN, el modelo es conservador:
+  cuando alerta suele acertar, pero deja pasar omisiones.
+- **`no_goggle` (recall 0,11):** es la clase más pequeña (347 cajas) y la de objeto más chico.
+  No es una clase Must en el plan.
+
+Mejoras técnicas para la fase F3: más épocas (100+) con GPU, YOLO11s o superior, `imgsz=960` para
+objetos pequeños, balanceo de clases (sobremuestreo de imágenes con `no_*`), umbral de confianza
+por clase y el dataset propio de la planta, con al menos un 20 % de imágenes nocturnas.
+
+## 8. Privacidad y límites
+
+- El sistema no identifica personas: registra solo fecha, origen, tipo de incumplimiento y
+  confianza. El difuminado facial (RF-03) aún no está implementado en el prototipo.
+- El modelo se entrenó con imágenes de obras de construcción. En una planta real hay que
+  reentrenarlo con imágenes propias etiquetadas.
+
+## 9. Problemas frecuentes
+
+| Síntoma | Solución |
+|---|---|
+| `ModuleNotFoundError: No module named 'cv2'` | Se está usando otro Python. Ejecuta con `.venv\Scripts\python.exe` o, en VS Code, elige ese intérprete con *Python: Select Interpreter* |
+| `Activate.ps1 ... la ejecución de scripts está deshabilitada` | No hace falta activar: usa `.venv\Scripts\python.exe` directamente |
+| `No Python at '...AppData\Roaming\uv\python...'` | El Python de uv quedó en una carpeta no visible. Reinstálalo con `UV_PYTHON_INSTALL_DIR` apuntando al proyecto (sección 2) |
+| `CUDA error` / `GPU is lost` al entrenar | Reinicia el equipo y revisa el controlador, la temperatura y la fuente. Mientras tanto usa `--dispositivo cpu` |
+| La App de FiftyOne no muestra imágenes | El dataset guarda rutas absolutas. Si moviste la carpeta, bórralo con `fo.delete_dataset("epp-construction-ppe")` y vuelve a ejecutar `02_explorar_fiftyone.py` |
