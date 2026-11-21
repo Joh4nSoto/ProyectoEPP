@@ -35,3 +35,6 @@ desktop.ini
 # --- Editores ---
 .vscode/
 .idea/
+
+# --- Documentos personales (no se suben) ---
+**/Guia_Defensa_Presentacion_EPP.*
