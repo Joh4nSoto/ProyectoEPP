@@ -221,12 +221,40 @@ Mejoras técnicas para la fase F3: más épocas (100+) con GPU, YOLO11s o superi
 objetos pequeños, balanceo de clases (sobremuestreo de imágenes con `no_*`), umbral de confianza
 por clase y el dataset propio de la planta, con al menos un 20 % de imágenes nocturnas.
 
-## 8. Privacidad y límites
+## 8. Sesgos, ética y límites del modelo
 
-- El sistema no identifica personas: registra solo fecha, origen, tipo de incumplimiento y
-  confianza. El difuminado facial (RF-03) aún no está implementado en el prototipo.
-- El modelo se entrenó con imágenes de obras de construcción. En una planta real hay que
-  reentrenarlo con imágenes propias etiquetadas.
+El análisis ético completo del proyecto está en el
+[Anexo C](../entregables/Plan/Anexo_C_Evaluacion_Etica_y_Legal.pdf). Esta sección cubre los
+sesgos propios del prototipo y cómo se controlan en el código.
+
+### Sesgos conocidos del prototipo
+
+| Sesgo | Origen | Efecto | Mitigación |
+|---|---|---|---|
+| **Dominio** | Las 1.000 imágenes son de obras de construcción y bodegas, no de la planta del cliente | El rendimiento en la planta real es desconocido y probablemente menor | Reentrenar con el dataset propio (E4) antes de cualquier uso real |
+| **Iluminación** | Casi todas las imágenes son diurnas y con buena luz | Más falsos negativos en zonas oscuras y en el turno de noche, siempre contra los mismos trabajadores | ≥ 20 % de imágenes nocturnas en E4 y evaluar el recall por condición de luz (campo de metadatos en FiftyOne) |
+| **Desbalance de clases** | Las clases `no_*` tienen de 2 a 3 veces menos cajas | Recall bajo justo en las clases que generan alertas | Sobremuestreo, más datos de incumplimiento y umbral de confianza por clase |
+| **Demográfico** | El dataset no registra complexión, género ni tono de piel, así que no se puede medir | Posible detección desigual de personas o de su EPP | En el dataset propio, etiquetar atributos no identificatorios de forma agregada y comparar el recall por grupo antes del piloto |
+| **Tamaño del objeto** | Antiparras y guantes ocupan pocos píxeles a 640 px | `no_goggle` con recall de 0,11 | `imgsz` mayor o cámaras más cercanas en zonas con antiparras |
+
+### Controles de diseño en el código
+
+- **Sin identificación:** el modelo no tiene clases de rostro ni de identidad, y `alertas.csv`
+  guarda solo fecha, origen, severidad, clase y confianza.
+- **Sin sanción automática:** el código solo registra y muestra alertas. La decisión siempre es
+  de un prevencionista (RF-04), que puede revisar los errores en la App de FiftyOne.
+- **Menos falsas alarmas:** en video, la alerta exige 3 segundos continuos de omisión, lo que evita
+  alertas por ocultamientos breves.
+- **Umbral explícito:** `CONF_MINIMA` está en `config.py` y se documenta su efecto sobre recall y
+  falsas alarmas, para que el ajuste sea una decisión consciente.
+
+### Límites actuales
+
+- El difuminado facial (RF-03) aún no está implementado. Las imágenes anotadas de
+  `resultados/` muestran rostros, así que no deben compartirse fuera del equipo. La imagen de la
+  presentación se difuminó a mano.
+- El recall de casco y chaleco (0,50 y 0,58) no permite usar el prototipo como sistema de
+  seguridad. Es solo una prueba de concepto.
 
 ## 9. Problemas frecuentes
 

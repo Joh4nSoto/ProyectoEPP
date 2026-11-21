@@ -7,7 +7,7 @@ Gestión de Proyectos de Datos (SCY1102) · Equipo: **Johan Soto** y **Fernanda 
 | Documento | Dónde |
 |---|---|
 | **Plan de proyecto v4 (documento principal)** | [`Plan_de_Proyecto_EPP_v4.pdf`](Plan_de_Proyecto_EPP_v4.pdf) |
-| Anexos A–F (requerimientos, finanzas, ética y legal, planificación, riesgos, trazabilidad) | [`entregables/Plan_v4/`](entregables/Plan_v4/) |
+| Anexos A–F (requerimientos, finanzas, ética y legal, planificación, riesgos, trazabilidad) | [`entregables/Plan/`](entregables/Plan/) |
 | Anexo G: arquitectura del sistema | [`entregables/Arquitectura_Sistema_EPP_v1.2.pdf`](entregables/Arquitectura_Sistema_EPP_v1.2.pdf) |
 | Tablero de seguimiento | [Jira, proyecto ME](https://sistema-monitoreo-epp.atlassian.net/jira/core/projects/ME/board) |
 | Prototipo y guía técnica | [`modelo/`](modelo/README.md) |
@@ -43,11 +43,34 @@ casco o chaleco en un máximo de **4 segundos**, con privacidad por diseño y va
 ## 3. ¿Es viable? Tres dimensiones
 
 ### Ética y legal
-El riesgo principal es que la vigilancia se perciba como control, o que un error del modelo termine en
-una sanción injusta. Se mitiga con difuminado de rostros en el nodo, sin identificación de personas,
-validación humana de cada alerta, datos de todos los turnos, retención de video de solo 30 días y un
-acuerdo con el sindicato. Cumple el Código del Trabajo (Art. 154 y 184), el Ord. 2000/49883 de la
-Dirección del Trabajo y la Ley 21.719 de datos personales. Detalle en el Anexo C.
+
+**Impactos éticos posibles**
+- **Privacidad:** una cámara permanente puede sentirse como vigilancia extrema.
+- **Estrés:** saberse observado por una IA puede aumentar la ansiedad de los trabajadores.
+- **Sanciones injustas:** una falsa alarma podría terminar en un llamado de atención inmerecido.
+- **Uso indebido:** que el sistema se use para controlar el rendimiento y no para prevenir accidentes.
+
+**Sesgos**
+- **Demográfico:** el modelo podría detectar peor a algunas personas o su EPP según su complexión,
+  género, tono de piel o la talla del equipo.
+- **De contexto:** podría funcionar bien con buena luz y fallar en zonas oscuras o en el turno de
+  noche, lo que perjudicaría siempre a los mismos trabajadores.
+
+**Mitigaciones**
+
+| Riesgo | Medida | Se verifica en |
+|---|---|---|
+| Pérdida de privacidad | El video se analiza en la planta y los rostros se difuminan antes de guardar o enviar cualquier imagen | RF-03, auditoría de 500 evidencias |
+| Uso como control laboral | Sin identificación ni métricas por persona; el dashboard muestra solo zona y turno | RF-06, exclusiones del alcance |
+| Sanción por error del modelo | Un prevencionista valida cada alerta; nunca hay sanción automática | RF-04 |
+| Sesgo por luz o turno | Al menos 20 % de imágenes nocturnas y métricas separadas por condición de luz | E4, RNF-02 |
+| Sesgo demográfico | Dataset propio con trabajadores reales de la planta y recall medido por grupo antes del piloto | E4, E5 |
+| Conservar datos de más | El video sin incidentes se elimina a los 30 días, con registro | RF-05 |
+| Falta de transparencia | Protocolo ético acordado con el sindicato y el Comité Paritario | E2 |
+
+**Marco legal:** Código del Trabajo (Art. 154 y 184), Ord. 2000/49883 de la Dirección del Trabajo,
+Ley 21.719 de datos personales (vigente desde el 1 de diciembre de 2026), Ley 16.744 y D.S. 594.
+Detalle en el [Anexo C](entregables/Plan/Anexo_C_Evaluacion_Etica_y_Legal.pdf).
 
 ### Financiera
 Se compararon tres alternativas: la supervisión manual actual, una solución en la nube y la
@@ -131,7 +154,7 @@ ProyectoEPP/
 ├── Plan_de_Proyecto_EPP_v4.pdf   documento principal
 ├── README.md                     esta página (visión de negocio y gestión)
 ├── entregables/
-│   ├── Plan_v4/                  anexos A–F en PDF
+│   ├── Plan/                     anexos A–F en PDF
 │   ├── Arquitectura_Sistema_EPP_v1.2.pdf   anexo G
 │   ├── editables/                versiones Word de todos los documentos
 │   ├── arquitectura_diagramas/   figuras de la arquitectura
