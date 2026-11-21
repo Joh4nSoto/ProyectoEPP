@@ -1,0 +1,6 @@
+# Instalar PyTorch con soporte GPU primero (ver README):
+#   uv pip install torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
+ultralytics==8.4.216
+fiftyone==1.22.1
+umap-learn==0.6.0
+opencv-python==5.1.0.95

@@ -1,0 +1,10 @@
+fecha,origen,severidad,mensaje,clase,confianza
+2026-11-20T23:10:48,E:\ProyectoEPP\images\source-00f1fbfd9c8193a3c5a071512cf8c0a7.jpg,ALTA,Trabajador sin chaleco reflectante,no_vest,0.81
+2026-11-20T23:10:48,E:\ProyectoEPP\images\source-00f1fbfd9c8193a3c5a071512cf8c0a7.jpg,MEDIA,Trabajador sin guantes,no_gloves,0.711
+2026-11-20T23:10:48,E:\ProyectoEPP\images\source-00f1fbfd9c8193a3c5a071512cf8c0a7.jpg,ALTA,Trabajador sin casco,no_helmet,0.634
+2026-11-20T23:10:48,E:\ProyectoEPP\images\source-00f1fbfd9c8193a3c5a071512cf8c0a7.jpg,MEDIA,Trabajador sin guantes,no_gloves,0.617
+2026-11-20T23:10:48,E:\ProyectoEPP\images\source-00f1fbfd9c8193a3c5a071512cf8c0a7.jpg,MEDIA,Trabajador sin calzado de seguridad,no_boots,0.538
+2026-11-20T23:10:48,E:\ProyectoEPP\images\source-23d79ca5bf1c6544231641a70af3f37d.jpg,MEDIA,Trabajador sin guantes,no_gloves,0.42
+2026-11-20T23:10:49,E:\ProyectoEPP\images\source-241f49c7c7ae0145e383951c72962fb9.jpg,ALTA,Trabajador sin chaleco reflectante,no_vest,0.864
+2026-11-20T23:10:49,E:\ProyectoEPP\images\source-3f184ae68fc6f7534cd774fed7b212fb.jpg,ALTA,Trabajador sin casco,no_helmet,0.411
+2026-11-20T23:10:49,E:\ProyectoEPP\images\source-49167518cb619cd5c12a8f33872f9b7e.jpg,ALTA,Trabajador sin chaleco reflectante,no_vest,0.725

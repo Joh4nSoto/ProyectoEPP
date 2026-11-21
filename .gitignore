@@ -1,0 +1,37 @@
+# --- Entorno de Python (se recrea con uv, ver modelo/README.md) ---
+.venv/
+.python/
+__pycache__/
+*.pyc
+.ipynb_checkpoints/
+
+# --- Datos (se descargan con modelo/codigo/01_descargar_datos.py, ~620 MB) ---
+modelo/datos/
+
+# --- Modelos y salidas de entrenamiento ---
+# Se versiona solo el modelo entrenado (5,5 MB) para que la demo funcione al clonar.
+# yolo11n.pt se descarga solo; runs/ se regenera al entrenar.
+modelo/pesos/*
+!modelo/pesos/epp_yolo11n.pt
+modelo/runs/
+*.log
+*.err
+
+# --- Salidas de la demo (se regeneran; la evidencia queda en modelo/evidencia) ---
+modelo/resultados/
+
+# --- Material del curso que no es del equipo o contiene notas ---
+documentacion/EP5_Instrucciones*.pdf
+documentacion/EP6_Instrucciones*.pdf
+documentacion/retroalimentacion_*.md
+
+# --- Archivos temporales de Office y del sistema ---
+~$*
+*.tmp
+Thumbs.db
+desktop.ini
+.DS_Store
+
+# --- Editores ---
+.vscode/
+.idea/
