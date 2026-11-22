@@ -67,6 +67,30 @@ modelo/
 
 ## 2. Instalación (Windows, una sola vez)
 
+### 2.1 Demo con doble clic (recomendado)
+
+En la raíz del repositorio está **`Iniciar_Demo_EPP.bat`**. Basta con clonar el repositorio y
+hacer doble clic en ese archivo para abrir la demo en tiempo real con la cámara web:
+
+1. Si el entorno `.venv` no existe o está incompleto, lo prepara solo: instala
+   [uv](https://docs.astral.sh/uv/) si falta (necesita internet), Python 3.11 dentro de
+   `.python\`, PyTorch (con CUDA 12.4 si detecta una GPU NVIDIA, si no la versión CPU) y
+   `modelo\codigo\requirements.txt`. La primera vez tarda entre 5 y 15 minutos según la conexión;
+   las siguientes parte de inmediato.
+2. Deja OpenCV con soporte de ventanas (ver sección 9).
+3. Lanza `05_detectar_alertas.py --fuente 0` con los pesos versionados `modelo\pesos\epp_yolo11n.pt`.
+
+En la ventana de video, **q** cierra la demo. Las alertas quedan en `modelo\resultados\alertas.csv`.
+Si el equipo tiene más de una cámara, se puede elegir otra desde una terminal:
+
+```powershell
+.\Iniciar_Demo_EPP.bat 1
+```
+
+Todas las rutas son relativas a la carpeta del `.bat`, así que funciona desde cualquier unidad o carpeta.
+
+### 2.2 Instalación manual
+
 Se usa [uv](https://docs.astral.sh/uv/) para crear el entorno con Python 3.11.
 
 ```powershell
@@ -76,6 +100,8 @@ uv python install 3.11
 uv venv .venv --python 3.11
 uv pip install --python .venv\Scripts\python.exe torch==2.6.0 torchvision==0.21.0 --index-url https://download.pytorch.org/whl/cu124
 uv pip install --python .venv\Scripts\python.exe -r modelo\codigo\requirements.txt
+uv pip uninstall --python .venv\Scripts\python.exe opencv-python-headless   # ver sección 9
+uv pip install --python .venv\Scripts\python.exe --no-deps --reinstall-package opencv-python -r modelo\codigo\requirements.txt
 ```
 
 Sin GPU NVIDIA, se puede omitir la línea de PyTorch con `cu124`: todo funciona en CPU, solo más lento.
@@ -261,6 +287,8 @@ sesgos propios del prototipo y cómo se controlan en el código.
 | Síntoma | Solución |
 |---|---|
 | `ModuleNotFoundError: No module named 'cv2'` | Se está usando otro Python. Ejecuta con `.venv\Scripts\python.exe` o, en VS Code, elige ese intérprete con *Python: Select Interpreter* |
+| `The function is not implemented ... cvNamedWindow` al abrir la cámara | FiftyOne instala `opencv-python-headless`, que no tiene ventanas y pisa a `opencv-python`. Ejecuta `Iniciar_Demo_EPP.bat` (lo repara solo) o las dos últimas líneas de la sección 2.2 |
+| La ventana del `.bat` dice `No se pudo abrir la fuente de video: 0` | La cámara está ocupada por otra aplicación o no hay cámara. Ciérrala o prueba con otro índice: `.\Iniciar_Demo_EPP.bat 1` |
 | `Activate.ps1 ... la ejecución de scripts está deshabilitada` | No hace falta activar: usa `.venv\Scripts\python.exe` directamente |
 | `No Python at '...AppData\Roaming\uv\python...'` | El Python de uv quedó en una carpeta no visible. Reinstálalo con `UV_PYTHON_INSTALL_DIR` apuntando al proyecto (sección 2) |
 | `CUDA error` / `GPU is lost` al entrenar | Reinicia el equipo y revisa el controlador, la temperatura y la fuente. Mientras tanto usa `--dispositivo cpu` |

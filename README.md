@@ -165,4 +165,5 @@ ProyectoEPP/
 └── modelo/                       prototipo de detección (README técnico, código, pesos y evidencia)
 ```
 
-Para ejecutar la demo del prototipo, ver la [guía técnica del modelo](modelo/README.md).
+Para ejecutar la demo del prototipo con la cámara web, haz doble clic en `Iniciar_Demo_EPP.bat`
+(la primera vez prepara el entorno solo). Más detalles en la [guía técnica del modelo](modelo/README.md).
